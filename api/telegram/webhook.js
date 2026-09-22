@@ -1,74 +1,108 @@
-const { getDb } = require('../../lib/db');
-const { analyze } = require('../../lib/detector');
+'use strict';
 
-module.exports = async (req, res) => {
-  if (req.method !== 'POST') return res.status(200).send('alive');
+const { getStore } = require('../../lib/getStore');
+const { ingestDetection } = require('../../lib/ingest');
+const { readJsonBody } = require('../../lib/readJsonBody');
 
-  const secret = req.headers['x-telegram-bot-api-secret-token'];
-  if (secret !== process.env.TELEGRAM_WEBHOOK_SECRET) {
-    return res.status(401).json({ ok: false });
-  }
+/**
+ * POST /api/telegram/webhook
+ *
+ * Receives a Telegram Bot API "Update" object (as configured via
+ * https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/setWebhook), pulls the
+ * message text/identity fields out of it, normalizes them to the shared
+ * "detections" shape (see api/detect.js), tags platform: "telegram", and
+ * runs them through the existing, unmodified detector (lib/detector.js
+ * analyze(), via lib/ingest.js).
+ *
+ * This file does not verify or use TELEGRAM_BOT_TOKEN itself - that
+ * credential is what you call the Telegram API *with* (e.g. to register
+ * this URL via setWebhook, or to send replies later); nothing about
+ * receiving and reading an update requires it. No outbound Telegram API
+ * calls are made here.
+ *
+ * Every code path below is defensive: a missing/odd field degrades to a
+ * safe default instead of throwing, and Telegram always gets a fast 200
+ * so it doesn't queue retries.
+ */
 
-  const m = req.body.message || req.body.channel_post || req.body.edited_message;
-  if (!m) return res.json({ ok: true });
+/** Pull the most relevant message-like object out of a Telegram Update. */
+function extractMessage(update) {
+  return (
+    update?.message ||
+    update?.edited_message ||
+    update?.channel_post ||
+    update?.edited_channel_post ||
+    null
+  );
+}
 
-  const text = m.text || m.caption || '';
-  const isPhoto = !!m.photo;
-  const a = analyze(text);
+/** Safely normalize a Telegram Update into the shared detection shape. */
+function normalizeTelegramUpdate(update) {
+  const msg = extractMessage(update) || {};
+  const from = msg.from || {};
+  const chat = msg.chat || {};
 
-  let imageLabels = [];
-  let imageRisk = 0;
+  const text =
+    typeof msg.text === 'string' ? msg.text :
+    typeof msg.caption === 'string' ? msg.caption :
+    '';
 
-  if (isPhoto) {
-    try {
-      const vision = require('../../lib/vision');
-      const largestPhoto = m.photo[m.photo.length - 1];
-      const token = process.env.TELEGRAM_BOT_TOKEN;
+  const username =
+    from.username ||
+    [from.first_name, from.last_name].filter(Boolean).join(' ').trim() ||
+    undefined;
 
-      const fileResp = await fetch(`https://api.telegram.org/bot${token}/getFile?file_id=${largestPhoto.file_id}`);
-      const fileData = await fileResp.json();
-      const filePath = fileData.result.file_path;
-      const fileUrl = `https://api.telegram.org/file/bot${token}/${filePath}`;
+  const chatTitle =
+    chat.title ||
+    chat.username ||
+    [chat.first_name, chat.last_name].filter(Boolean).join(' ').trim() ||
+    undefined;
 
-      const visionResult = await vision.analyzeImage(fileUrl);
-      imageLabels = visionResult.labels || [];
-      imageRisk = visionResult.risk || 0;
-    } catch (e) {
-      // vision not available or failed, continue without it
-    }
-  }
+  // Telegram sends `date` as Unix seconds; fall back to receipt time if absent/invalid.
+  const ts = Number.isFinite(msg.date) ? msg.date * 1000 : undefined;
 
-  const risk = Math.max(a.risk, imageRisk, isPhoto ? 2 : 0);
-  if (risk === 0) return res.json({ ok: true });
-
-  let level = 'low';
-  if (risk >= 7) level = 'high';
-  else if (risk >= 4) level = 'medium';
-
-  const doc = {
+  return {
+    text,
+    userId: from.id != null ? String(from.id) : undefined,
+    username,
+    chatId: chat.id != null ? String(chat.id) : undefined,
+    chatTitle,
     platform: 'telegram',
-    chatId: String(m.chat.id),
-    chatTitle: m.chat.title || 'private',
-    userId: String(m.from?.id || m.sender_chat?.id || ''),
-    username: m.from?.username || m.from?.first_name || 'unknown',
-    text: text || '[photo]',
-    mediaType: isPhoto ? 'photo' : 'text',
-    ts: new Date(m.date * 1000),
-    risk,
-    level,
-    categories: a.categories || [],
-    matches: a.matches || [],
-    identifiers: a.identifiers || {},
-    reasons: a.reasons || [],
-    imageLabels
+    mediaType: typeof msg.caption === 'string' && typeof msg.text !== 'string' ? 'caption' : 'text',
+    ts
   };
+}
+
+async function handler(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return res.status(405).json({ error: 'method not allowed, expected POST' });
+  }
+
+  let update;
+  try {
+    update = await readJsonBody(req);
+  } catch (err) {
+    console.error('telegram webhook: failed to read body:', err);
+    update = {};
+  }
+  if (!update || typeof update !== 'object') update = {};
 
   try {
-    const db = await getDb();
-    await db.collection('detections').insertOne(doc);
-  } catch (e) {
-    console.error('DB insert failed', e);
+    const normalized = normalizeTelegramUpdate(update);
+    const store = await getStore().catch(err => {
+      console.error('telegram webhook: store unavailable, continuing without persistence:', err);
+      return null;
+    });
+    const outcome = await ingestDetection(store, normalized);
+    return res.status(200).json({ ok: true, ...outcome });
+  } catch (err) {
+    // Telegram will retry non-2xx responses; an update we couldn't process
+    // is not something retrying fixes, so still ack with 200 and just log it.
+    console.error('telegram webhook: failed to process update:', err);
+    return res.status(200).json({ ok: true, skipped: true, reason: 'processing error' });
   }
+}
 
-  return res.json({ ok: true });
-};
+module.exports = handler;
+module.exports.normalizeTelegramUpdate = normalizeTelegramUpdate;
