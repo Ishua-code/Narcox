@@ -275,3 +275,60 @@ function runAllUpdates() {
 
 // Tell our poll() tool to run everything every 5 seconds!
 poll(runAllUpdates, 5000);
+
+
+async function updateCharts() {
+    const stats = await API.get('/api/stats');
+    if (!stats) return;
+
+    const trendContainer = document.getElementById('chart-trends');
+    if (trendContainer && Array.isArray(stats.trend)) {
+        const maxCount = Math.max(1, ...stats.trend.map(d => d.count));
+        trendContainer.innerHTML = stats.trend.length === 0
+            ? '<div class="text-center text-muted-foreground text-sm w-full">No data in the last 7 days</div>'
+            : stats.trend.map(d => {
+                const heightPct = Math.round((d.count / maxCount) * 100);
+                const day = new Date(d._id).toLocaleDateString(undefined, { weekday: 'short' });
+                return `
+                    <div class="flex flex-col items-center flex-1">
+                        <div class="w-full bg-primary rounded-t" style="height:${Math.max(heightPct, 4)}%"></div>
+                        <div class="text-[10px] text-muted-foreground mt-2">${day}</div>
+                        <div class="text-[10px] text-muted-foreground">${d.count}</div>
+                    </div>
+                `;
+            }).join('');
+    }
+
+    const mediaContainer = document.getElementById('chart-media');
+    if (mediaContainer && stats.byType) {
+        const entries = Object.entries(stats.byType);
+        const total = entries.reduce((sum, [, count]) => sum + count, 0) || 1;
+        mediaContainer.innerHTML = entries.length === 0
+            ? '<div class="text-center text-muted-foreground text-sm">No data available</div>'
+            : entries.map(([type, count]) => {
+                const pct = Math.round((count / total) * 100);
+                return `
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-muted-foreground capitalize">${type}</span>
+                            <span class="text-primary font-medium">${count}</span>
+                        </div>
+                        <div class="w-full bg-muted/30 rounded-full h-2">
+                            <div class="bg-primary h-2 rounded-full" style="width:${pct}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+    }
+}
+
+if (typeof updateDashboard === 'function') {
+    const _origUpdateDashboard = updateDashboard;
+    updateDashboard = async function() {
+        await _origUpdateDashboard();
+        await updateCharts();
+    };
+} else {
+    setInterval(updateCharts, 5000);
+    updateCharts();
+}

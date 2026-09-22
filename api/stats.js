@@ -1,20 +1,20 @@
-const { getDb } = require('../lib/db');
+﻿const { getDb } = require('../lib/db');
 
 module.exports = async (req, res) => {
   try {
     const db = await getDb();
-    
+
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
     const totalAlerts = await db.collection('detections').countDocuments({ risk: { $gte: 7 }, ts: { $gte: thirtyDaysAgo } });
     const evidencePackages = await db.collection('evidence').countDocuments();
-    
+
     const highRiskEntitiesArray = await db.collection('detections').distinct('userId', { risk: { $gte: 7 } });
     const highRiskEntities = highRiskEntitiesArray.length;
-    
+
     const detections30d = await db.collection('detections').countDocuments({ ts: { $gte: thirtyDaysAgo } });
-    const highRisk = totalAlerts; 
+    const highRisk = totalAlerts;
 
     const byTypePipeline = [
       { $match: { ts: { $gte: thirtyDaysAgo } } },
@@ -23,6 +23,21 @@ module.exports = async (req, res) => {
     const byTypeResults = await db.collection('detections').aggregate(byTypePipeline).toArray();
     const byType = {};
     byTypeResults.forEach(r => { byType[r._id || 'unknown'] = r.count; });
+
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const trendPipeline = [
+      { $match: { ts: { $gte: sevenDaysAgo } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$ts" } },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ];
+    const trend = await db.collection('detections').aggregate(trendPipeline).toArray();
 
     const recent = await db.collection('detections').find().sort({ ts: -1 }).limit(5).toArray();
 
@@ -33,6 +48,7 @@ module.exports = async (req, res) => {
       detections30d,
       highRisk,
       byType,
+      trend,
       recent
     });
   } catch (error) {
