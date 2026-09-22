@@ -1,0 +1,78 @@
+[1mdiff --git a/.gitignore b/.gitignore[m
+[1mindex 35417bd..2a615a5 100644[m
+[1m--- a/.gitignore[m
+[1m+++ b/.gitignore[m
+[36m@@ -1,3 +1,4 @@[m
+ node_modules/[m
+ .env[m
+ .vercel/[m
+[32m+[m[32m.vercel[m
+[1mdiff --git a/package-lock.json b/package-lock.json[m
+[1mindex 9947a7d..8ddc822 100644[m
+[1m--- a/package-lock.json[m
+[1m+++ b/package-lock.json[m
+[36m@@ -9,6 +9,7 @@[m
+       "version": "1.0.0",[m
+       "license": "ISC",[m
+       "dependencies": {[m
+[32m+[m[32m        "dotenv": "^18.0.2",[m
+         "mongodb": "^7.6.0"[m
+       }[m
+     },[m
+[36m@@ -41,6 +42,21 @@[m
+         "node": ">=20.19.0"[m
+       }[m
+     },[m
+[32m+[m[32m    "node_modules/dotenv": {[m
+[32m+[m[32m      "version": "18.0.2",[m
+[32m+[m[32m      "resolved": "https://registry.npmjs.org/dotenv/-/dotenv-18.0.2.tgz",[m
+[32m+[m[32m      "integrity": "sha512-wl0U3CxC0iobaryqEKpFJxzyp4AxQFYAKj/WWszXZr87vVHLi2yJv2syax5Vxt+u02xqNgE277rsc3lOKg9sPg==",[m
+[32m+[m[32m      "license": "BSD-2-Clause",[m
+[32m+[m[32m      "bin": {[m
+[32m+[m[32m        "dotenv": "dist/index.cjs"[m
+[32m+[m[32m      },[m
+[32m+[m[32m      "engines": {[m
+[32m+[m[32m        "node": ">=12"[m
+[32m+[m[32m      },[m
+[32m+[m[32m      "funding": {[m
+[32m+[m[32m        "url": "https://dotenvx.com"[m
+[32m+[m[32m      }[m
+[32m+[m[32m    },[m
+     "node_modules/memory-pager": {[m
+       "version": "1.5.0",[m
+       "resolved": "https://registry.npmjs.org/memory-pager/-/memory-pager-1.5.0.tgz",[m
+[36m@@ -50,6 +66,7 @@[m
+       "version": "7.6.0",[m
+       "resolved": "https://registry.npmjs.org/mongodb/-/mongodb-7.6.0.tgz",[m
+       "integrity": "sha512-WbZ6OCjYw2c53LOjfkQa+reXr7kIiOVpXXglnASFuiMtif0BvsMwHe3ClJHLm1/r7wJFwaasfFtD6iYIktB01g==",[m
+[32m+[m[32m      "license": "Apache-2.0",[m
+       "dependencies": {[m
+         "@mongodb-js/saslprep": "^1.4.11",[m
+         "bson": "^7.2.0",[m
+[1mdiff --git a/package.json b/package.json[m
+[1mindex fe76ac3..c7240d4 100644[m
+[1m--- a/package.json[m
+[1m+++ b/package.json[m
+[36m@@ -22,6 +22,7 @@[m
+   },[m
+   "homepage": "https://github.com/Ishua-code/Narcox#readme",[m
+   "dependencies": {[m
+[32m+[m[32m    "dotenv": "^18.0.2",[m
+     "mongodb": "^7.6.0"[m
+   }[m
+ }[m
+[1mdiff --git a/vercel.json b/vercel.json[m
+[1mindex e8d8ad8..b5cd49c 100644[m
+[1m--- a/vercel.json[m
+[1m+++ b/vercel.json[m
+[36m@@ -1,8 +1,7 @@[m
+ {[m
+   "functions": {[m
+     "api/**/*.js": {[m
+[31m-      "maxDuration": 30,[m
+[31m-      "includeFiles": "lib/**"[m
+[32m+[m[32m      "maxDuration": 30[m
+     }[m
+   }[m
+ }[m
+\ No newline at end of file[m
