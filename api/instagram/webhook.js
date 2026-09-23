@@ -1,4 +1,4 @@
-const { getDb } = require('../../lib/db');
+﻿const { getDb } = require('../../lib/db');
 const { analyze } = require('../../lib/detector');
 
 module.exports = async function handler(req, res) {
@@ -14,6 +14,8 @@ module.exports = async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
+    console.log('IG WEBHOOK BODY:', JSON.stringify(req.body));
+
     const entries = req.body.entry || [];
     const items = [];
 
@@ -49,29 +51,37 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    console.log('IG WEBHOOK ITEMS:', JSON.stringify(items));
+
     const db = await getDb();
 
     for (const item of items) {
       const a = analyze(item.text);
+      console.log('IG WEBHOOK ANALYZE RESULT:', item.text, '->', a.risk);
       if (a.risk === 0) continue;
 
-      await db.collection('detections').insertOne({
-        platform: 'instagram',
-        chatId: item.chat,
-        chatTitle: item.chat,
-        userId: item.userId,
-        username: item.username,
-        text: item.text,
-        mediaType: item.mediaType,
-        ts: item.ts,
-        risk: a.risk,
-        level: a.level,
-        categories: a.categories,
-        matches: a.matches,
-        identifiers: a.identifiers,
-        reasons: a.reasons,
-        imageLabels: []
-      });
+      try {
+        const result = await db.collection('detections').insertOne({
+          platform: 'instagram',
+          chatId: item.chat,
+          chatTitle: item.chat,
+          userId: item.userId,
+          username: item.username,
+          text: item.text,
+          mediaType: item.mediaType,
+          ts: item.ts,
+          risk: a.risk,
+          level: a.level,
+          categories: a.categories,
+          matches: a.matches,
+          identifiers: a.identifiers,
+          reasons: a.reasons,
+          imageLabels: []
+        });
+        console.log('IG WEBHOOK INSERT OK:', result.insertedId);
+      } catch (err) {
+        console.error('IG WEBHOOK INSERT FAILED:', err);
+      }
     }
 
     return res.json({ ok: true });
