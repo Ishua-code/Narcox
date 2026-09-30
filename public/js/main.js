@@ -291,8 +291,8 @@ async function updateNetwork() {
             borderWidth: ring ? 3 : (hot ? 3 : 1.5),
             shadow: { enabled: true, color: 'rgba(0,0,0,0.1)', size: 10, x: 2, y: 2 },
             font: { color: '#0f172a', size: 13, face: 'Inter, ui-sans-serif, system-ui', strokeWidth: 3, strokeColor: '#ffffff' },
-            title: `${n.label}nType: ${n.type}nRisk: ${n.risk}/10nConnections: ${n.degree || 0}` +
-                   (n.role ? `nRole: ${n.role}` : '')
+            title: `${n.label}\nType: ${n.type}\nRisk: ${n.risk}/10\nConnections: ${n.degree || 0}` +
+                   (n.role ? `\nRole: ${n.role}` : '')
         };
     }));
 
