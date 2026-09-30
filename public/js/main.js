@@ -286,11 +286,11 @@ async function updateNetwork() {
             color: {
                 background: hot ? '#ff3b3b' : base,
                 border: ring ? '#e5e7eb' : (hot ? '#ffb3b3' : 'rgba(255,255,255,0.25)'),
-                highlight: { background: '#ffffff', border: '#ff3b3b' }
+                highlight: { background: '#fef2f2', border: '#ef4444' }
             },
             borderWidth: ring ? 3 : (hot ? 3 : 1.5),
-            shadow: { enabled: true, color: hot ? 'rgba(255,59,59,0.85)' : 'rgba(56,189,248,0.35)', size: hot ? 28 : 14, x: 0, y: 0 },
-            font: { color: '#f8fafc', size: 13, face: 'Inter, ui-sans-serif, system-ui', strokeWidth: 4, strokeColor: '#05070a' },
+            shadow: { enabled: true, color: 'rgba(0,0,0,0.1)', size: 10, x: 2, y: 2 },
+            font: { color: '#0f172a', size: 13, face: 'Inter, ui-sans-serif, system-ui', strokeWidth: 3, strokeColor: '#ffffff' },
             title: `${n.label}nType: ${n.type}nRisk: ${n.risk}/10nConnections: ${n.degree || 0}` +
                    (n.role ? `nRole: ${n.role}` : '')
         };
@@ -300,7 +300,7 @@ async function updateNetwork() {
         id: i, from: e.from, to: e.to,
         width: Math.min(1 + Math.log2(e.weight + 1) * 1.5, 8),
         title: `${e.kind} x${e.weight}`,
-        color: { color: 'rgba(148,163,184,0.55)', highlight: '#ff3b3b', opacity: 0.85 },
+        color: { color: '#94a3b8', highlight: '#ef4444', opacity: 0.8 },
         smooth: { type: 'continuous' },
         arrows: { to: { enabled: true, scaleFactor: 0.5 } }
     })));
@@ -320,8 +320,8 @@ async function updateNetwork() {
     if (!panel) {
         panel = document.createElement('div');
         panel.id = 'network-panel';
-        panel.style.cssText = 'position:absolute;top:12px;right:12px;width:230px;background:rgba(5,7,10,.9);' +
-            'border:1px solid rgba(148,163,184,0.25);border-radius:10px;padding:14px;font-size:12px;color:#e2e8f0;display:none;z-index:5;backdrop-filter:blur(4px)';
+        panel.style.cssText = 'position:absolute;top:12px;right:12px;width:230px;background:rgba(255,255,255,0.95);box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);' +
+            'border:1px solid #cbd5e1;border-radius:10px;padding:14px;font-size:12px;color:#0f172a;display:none;z-index:5;backdrop-filter:blur(4px)';
         container.style.position = 'relative';
         container.appendChild(panel);
     }

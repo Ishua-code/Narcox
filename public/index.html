@@ -63,12 +63,12 @@
         #network-map-container {
             width: 100%;
             height: 600px;
-            background-color: #05070a;
-            background-image: radial-gradient(rgba(59,130,246,0.15) 1px, transparent 1px);
+            background-color: #f8fafc;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
             background-size: 24px 24px;
-            border: 1px solid #1e293b;
+            border: 1px solid #cbd5e1;
             border-radius: 0.75rem;
-            box-shadow: inset 0 0 60px rgba(0,0,0,0.6);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
         }
         #page-network.hidden { display: none !important; }
         #network-map-container {
@@ -95,8 +95,6 @@
 
     
     <!-- Top thin bar -->
-    <div style="background-color: #e2e8f0; color: #475569; font-size: 0.75rem; padding: 6px 20px; display: flex; justify-content: space-between; border-bottom: 1px solid #cbd5e1;">
-        <div style="display: flex; gap: 24px; align-items: center;">
             <img src="https://upload.wikimedia.org/wikipedia/en/thumb/4/41/Flag_of_India.svg/20px-Flag_of_India.svg.png" style="height: 12px;" alt="India">
             <span style="font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Government of India - Internal Use Only</span>
         </div>
@@ -302,7 +300,7 @@
                 <!-- Charts and Tables -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                     <!-- Alert Trends Chart -->
-                    <div class="chart-container p-6 rounded-lg">
+                    <div class="chart-container p-4 md:p-6 rounded-lg overflow-x-auto w-full">
                         <h3 class="text-lg font-semibold mb-4">Alert Trends (Last 7 Days)</h3>
                         <div class="h-64 flex items-end justify-between space-x-2" id="chart-trends">
                             <!-- Bars will go here -->
@@ -310,7 +308,7 @@
                     </div>
 
                     <!-- Risk Distribution -->
-                    <div class="chart-container p-6 rounded-lg">
+                    <div class="chart-container p-4 md:p-6 rounded-lg overflow-x-auto w-full">
                         <h3 class="text-lg font-semibold mb-4">Media Type Breakdown</h3>
                         <div class="space-y-4" id="chart-media">
                             <!-- Media bars will go here -->
@@ -319,7 +317,7 @@
                 </div>
 
                 <!-- Recent Alerts Table -->
-                <div class="chart-container p-6 rounded-lg">
+                <div class="chart-container p-4 md:p-6 rounded-lg overflow-x-auto w-full">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold">Recent Alerts</h3>
                         <button class="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
@@ -327,7 +325,8 @@
                         </button>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full">
+                        <div class="overflow-x-auto w-full">
+<table class="w-full">
                             <thead>
                                 <tr class="border-b border-border">
                                     <th class="text-left py-3 px-4 font-medium text-muted-foreground">ID</th>
@@ -341,6 +340,7 @@
                                 <!-- Table rows will be injected here via JS -->
                             </tbody>
                         </table>
+</div>
                     </div>
                 </div>
                 </div> <!-- End of Dashboard Page -->
@@ -416,17 +416,21 @@
                     </div>
 
                     <div class="grid md:grid-cols-2 gap-6">
-                        <div class="chart-container p-6 rounded-lg">
+                        <div class="chart-container p-4 md:p-6 rounded-lg overflow-x-auto w-full">
                             <h3 class="font-bold mb-3">Top Keywords</h3>
-                            <table class="w-full text-sm">
+                            <div class="overflow-x-auto w-full">
+<table class="w-full text-sm">
                                 <tbody id="report-keywords-tbody"></tbody>
                             </table>
+</div>
                         </div>
-                        <div class="chart-container p-6 rounded-lg">
+                        <div class="chart-container p-4 md:p-6 rounded-lg overflow-x-auto w-full">
                             <h3 class="font-bold mb-3">Top Accounts</h3>
-                            <table class="w-full text-sm">
+                            <div class="overflow-x-auto w-full">
+<table class="w-full text-sm">
                                 <tbody id="report-accounts-tbody"></tbody>
                             </table>
+</div>
                         </div>
                     </div>
                 </div>
@@ -457,9 +461,10 @@
                             <p class="text-muted-foreground">Real-time stream of high-risk drug trafficking detections.</p>
                         </div>
                     </div>
-                    <div class="chart-container p-6 rounded-lg">
+                    <div class="chart-container p-4 md:p-6 rounded-lg overflow-x-auto w-full">
                         <div class="overflow-x-auto">
-                            <table class="w-full">
+                            <div class="overflow-x-auto w-full">
+<table class="w-full">
                                 <thead>
                                     <tr class="border-b border-border">
                                         <th class="text-left py-3 px-4 font-medium text-muted-foreground">Time</th>
@@ -474,6 +479,7 @@
                                     <!-- Alerts will appear here -->
                                 </tbody>
                             </table>
+</div>
                         </div>
                     </div>
                 </div> <!-- End of Alerts Page -->
@@ -493,15 +499,16 @@
                         </div>
                     </div>
                     
-                    <div class="flex items-center space-x-4 mb-4">
+                    <div class="flex flex-wrap items-center gap-4 mb-4">
                         <input type="number" id="tg-min-risk" value="4" class="bg-input text-foreground border border-border rounded px-3 py-1 w-24" placeholder="Min Risk">
                         <input type="number" id="tg-days" value="30" class="bg-input text-foreground border border-border rounded px-3 py-1 w-24" placeholder="Days">
                         <button onclick="updateTelegram()" class="px-4 py-1 bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded transition-colors">Refresh</button>
                     </div>
 
-                    <div class="chart-container p-6 rounded-lg">
+                    <div class="chart-container p-4 md:p-6 rounded-lg overflow-x-auto w-full">
                         <div class="overflow-x-auto">
-                            <table class="w-full">
+                            <div class="overflow-x-auto w-full">
+<table class="w-full">
                                 <thead>
                                     <tr class="border-b border-border">
                                         <th class="text-left py-3 px-4 font-medium text-muted-foreground">Time</th>
@@ -515,6 +522,7 @@
                                     <!-- Telegram data will appear here -->
                                 </tbody>
                             </table>
+</div>
                         </div>
                     </div>
                 </div> <!-- End of Telegram Page -->
@@ -527,9 +535,10 @@
                             <p class="text-muted-foreground">Monitor webhook ingested Instagram DMs and Comments.</p>
                         </div>
                     </div>
-                    <div class="chart-container p-6 rounded-lg">
+                    <div class="chart-container p-4 md:p-6 rounded-lg overflow-x-auto w-full">
                         <div class="overflow-x-auto">
-                            <table class="w-full">
+                            <div class="overflow-x-auto w-full">
+<table class="w-full">
                                 <thead>
                                     <tr class="border-b border-border">
                                         <th class="text-left py-3 px-4 font-medium text-muted-foreground">Time</th>
@@ -543,6 +552,7 @@
                                     <!-- Instagram data will appear here -->
                                 </tbody>
                             </table>
+</div>
                         </div>
                     </div>
                 </div> <!-- End of Instagram Page -->
@@ -551,7 +561,7 @@
                 <div id="page-settings" class="page-section hidden">
                     <h2 class="text-2xl font-bold mb-6">System Settings</h2>
                     <div class="grid gap-6 md:grid-cols-2">
-                        <div class="chart-container p-6 rounded-lg">
+                        <div class="chart-container p-4 md:p-6 rounded-lg overflow-x-auto w-full">
                             <h3 class="text-lg font-semibold mb-4 text-primary">Connected Sources</h3>
                             <ul class="space-y-3">
                                 <li class="flex items-center justify-between"><span class="text-muted-foreground">Telegram Bot</span> <span class="text-green-400">Connected &#10003</span></li>
@@ -559,7 +569,7 @@
                                 <li class="flex items-center justify-between"><span class="text-muted-foreground">WhatsApp</span> <span class="text-red-400">Not Supported (E2E Encrypted)</span></li>
                             </ul>
                         </div>
-                        <div class="chart-container p-6 rounded-lg">
+                        <div class="chart-container p-4 md:p-6 rounded-lg overflow-x-auto w-full">
                             <h3 class="text-lg font-semibold mb-4 text-primary">Risk Thresholds</h3>
                             <ul class="space-y-3">
                                 <li class="flex items-center justify-between"><span class="text-red-400">High Risk</span> <span class="font-mono">Score >= 7</span></li>
